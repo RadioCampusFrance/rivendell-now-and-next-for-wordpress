@@ -18,27 +18,27 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Register the custom post type "Playlist entry"
  */
 function register_cpt_playlist_entry() {
- 
+
     $labels = array(
-        'name' => _x( 'Playlist entries', 'playlist_entry' ),
-        'singular_name' => _x( 'Playlist entry', 'playlist_entry' ),
-        'add_new' => _x( 'Add New', 'playlist_entry' ),
-        'add_new_item' => _x( 'Add New Playlist entry', 'playlist_entry' ),
-        'edit_item' => _x( 'Edit Playlist entry', 'playlist_entry' ),
-        'new_item' => _x( 'New Playlist entry', 'playlist_entry' ),
-        'view_item' => _x( 'View Playlist entry', 'playlist_entry' ),
-        'search_items' => _x( 'Search Playlist entries', 'playlist_entry' ),
-        'not_found' => _x( 'No Playlist entries found', 'playlist_entry' ),
-        'not_found_in_trash' => _x( 'No Playlist entries found in Trash', 'playlist_entry' ),
-        'parent_item_colon' => _x( 'Parent Playlist entry:', 'playlist_entry' ),
-        'menu_name' => _x( 'Playlist entries', 'playlist_entry' ),
+        'name' => __( 'Playlist entries', 'rivendell-now-and-next' ),
+        'singular_name' => __( 'Playlist entry', 'rivendell-now-and-next' ),
+        'add_new' => __( 'Add New', 'rivendell-now-and-next' ),
+        'add_new_item' => __( 'Add New Playlist entry', 'rivendell-now-and-next' ),
+        'edit_item' => __( 'Edit Playlist entry', 'rivendell-now-and-next' ),
+        'new_item' => __( 'New Playlist entry', 'rivendell-now-and-next' ),
+        'view_item' => __( 'View Playlist entry', 'rivendell-now-and-next' ),
+        'search_items' => __( 'Search Playlist entries', 'rivendell-now-and-next' ),
+        'not_found' => __( 'No Playlist entries found', 'rivendell-now-and-next' ),
+        'not_found_in_trash' => __( 'No Playlist entries found in Trash', 'rivendell-now-and-next' ),
+        'parent_item_colon' => __( 'Parent Playlist entry:', 'rivendell-now-and-next' ),
+        'menu_name' => __( 'Playlist entries', 'rivendell-now-and-next' ),
     );
- 
+
     $args = array(
         'labels' => $labels,
         'hierarchical' => true,
-        'description' => 'Music reviews filterable by genre',
-        'supports' => array( 'title' ),
+        'description' => "Rivendell's playlist",
+        'supports' => array('title'),
         'taxonomies' => array(),
         'public' => true,
         'show_ui' => true,
@@ -54,8 +54,10 @@ function register_cpt_playlist_entry() {
         'rewrite' => true,
         'capability_type' => 'post'
     );
- 
+
     register_post_type( 'playlist_entry', $args );
+    //TODO load_plugin_textdomain('rivendell-now-and-next', false, basename( dirname( __FILE__ ) ) . '/lang' 
 }
- 
+
 add_action( 'init', 'register_cpt_playlist_entry' );
+add_option('key');
