@@ -13,9 +13,6 @@ stores the playlist and lets the user browse the past playlist.
 Creates a "playlist" webpage, which you can edit to change the title and the
 header text.
 
-You may have to adapt the HTML <div> in rivendell-playlist-page.php to match
-your theme's page.php template.
-
 TODO
 * i18n https://codex.wordpress.org/I18n_for_WordPress_Developers
 * drop table in https://developer.wordpress.org/reference/functions/register_uninstall_hook/

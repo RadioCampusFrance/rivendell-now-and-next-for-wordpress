@@ -26,12 +26,21 @@ class RivendellNowAndNext {
         return $wpdb->prefix . "rivendell_playlist";
     }
 
+    private static $instance;
+
+    public static function instance() {
+		if ( ! isset( self::$instance ) && ! ( self::$instance instanceof RivendellNowAndNext ) ) {
+			self::$instance = new RivendellNowAndNext();
+		}
+		return self::$instance;
+	}
+
     public function __construct () {
         register_activation_hook( __FILE__, array ( $this, 'install' ) );
         add_action( 'init', array ( $this, 'wp_init') );
         add_action( 'admin_post_nopriv_store', array ( $this, 'store') );
         add_action( 'admin_post_store', array ( $this, 'store') );
-        add_filter( 'page_template', array ( $this, 'show') , 99 );
+        add_filter( 'page_template', array ( $this, 'playlist_page') , 99 );
     }
 
     function install () {
@@ -84,15 +93,42 @@ class RivendellNowAndNext {
         
     }
     
-    function show( $page_template ) {
+    function playlist_page ( $page_template ) {
 
         if ( is_page( 'playlist' ) ) {
-            $page_template = dirname( __FILE__ ) . '/rivendell-playlist-page.php';
+            add_filter( 'the_content', array ( $this, 'list_entries'), 1 );
         }
-        
+
         return $page_template;
+    }
+
+    function list_entries ( $content ) {
+
+        global $wp_current_filter;
+
+        // Don't add to get_the_excerpt because it's too early and strips tags (adding to the_excerpt is allowed)
+        if ( in_array( 'get_the_excerpt', (array) $wp_current_filter ) ) {
+            return $content;
+        }
+
+        global $wpdb;
+        $table_name = self::table_name();
+        $entries = $wpdb->get_results( "
+        SELECT *
+        FROM $table_name
+        ORDER BY time DESC
+        LIMIT 20
+        ");
+
+        $content .= "<ul>\n";
+        foreach ( $entries as $entry ) {
+            $content .= "<li>$entry->time $entry->artist - $entry->title</li>\n";
+        }
+        $content .= "</ul>\n";
+
+        return $content;
     }
 }
 
-$rivendell_now_and_next = new RivendellNowAndNext();
+$rivendell_now_and_next = RivendellNowAndNext::instance();
 
