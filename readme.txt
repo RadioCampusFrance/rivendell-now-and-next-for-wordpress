@@ -10,4 +10,12 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Collects "Now & Next" signals from RDAirPlay (Rivendell's automation software),
 stores the playlist and lets the user browse the past playlist.
 
-Playlist entries are stored 
+Creates a "playlist" webpage, which you can edit to change the title and the
+header text.
+
+You may have to adapt the HTML <div> in rivendell-playlist-page.php to match
+your theme's page.php template.
+
+TODO
+* i18n https://codex.wordpress.org/I18n_for_WordPress_Developers
+* drop table in https://developer.wordpress.org/reference/functions/register_uninstall_hook/

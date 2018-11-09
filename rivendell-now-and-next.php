@@ -14,50 +14,85 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**
- * Register the custom post type "Playlist entry"
- */
-function register_cpt_playlist_entry() {
+class RivendellNowAndNext {
 
-    $labels = array(
-        'name' => __( 'Playlist entries', 'rivendell-now-and-next' ),
-        'singular_name' => __( 'Playlist entry', 'rivendell-now-and-next' ),
-        'add_new' => __( 'Add New', 'rivendell-now-and-next' ),
-        'add_new_item' => __( 'Add New Playlist entry', 'rivendell-now-and-next' ),
-        'edit_item' => __( 'Edit Playlist entry', 'rivendell-now-and-next' ),
-        'new_item' => __( 'New Playlist entry', 'rivendell-now-and-next' ),
-        'view_item' => __( 'View Playlist entry', 'rivendell-now-and-next' ),
-        'search_items' => __( 'Search Playlist entries', 'rivendell-now-and-next' ),
-        'not_found' => __( 'No Playlist entries found', 'rivendell-now-and-next' ),
-        'not_found_in_trash' => __( 'No Playlist entries found in Trash', 'rivendell-now-and-next' ),
-        'parent_item_colon' => __( 'Parent Playlist entry:', 'rivendell-now-and-next' ),
-        'menu_name' => __( 'Playlist entries', 'rivendell-now-and-next' ),
-    );
+    const SCHEMA_VERSION = "1.0";
+    const OPTION_DB_VERSION = "rivendell_now_and_next_db_version";
+    const OPTION_KEY = "rivendell_now_and_next_key";
 
-    $args = array(
-        'labels' => $labels,
-        'hierarchical' => true,
-        'description' => "Rivendell's playlist",
-        'supports' => array('title'),
-        'taxonomies' => array(),
-        'public' => true,
-        'show_ui' => true,
-        'show_in_menu' => true,
-        'menu_position' => 5,
-        'menu_icon' => 'dashicons-format-audio',
-        'show_in_nav_menus' => true,
-        'publicly_queryable' => true,
-        'exclude_from_search' => false,
-        'has_archive' => true,
-        'query_var' => true,
-        'can_export' => true,
-        'rewrite' => true,
-        'capability_type' => 'post'
-    );
+    static function table_name () {
 
-    register_post_type( 'playlist_entry', $args );
-    //TODO load_plugin_textdomain('rivendell-now-and-next', false, basename( dirname( __FILE__ ) ) . '/lang' 
+        global $wpdb;
+        return $wpdb->prefix . "rivendell_playlist";
+    }
+
+    public function __construct () {
+        register_activation_hook( __FILE__, array ( $this, 'install' ) );
+        add_action( 'init', array ( $this, 'wp_init') );
+        add_action( 'admin_post_nopriv_store', array ( $this, 'store') );
+        add_action( 'admin_post_store', array ( $this, 'store') );
+        add_filter( 'page_template', array ( $this, 'show') , 99 );
+    }
+
+    function install () {
+
+        $installed_version = get_option( self::OPTION_DB_VERSION );
+
+        if ( $installed_version != self::SCHEMA_VERSION ) {
+
+            global $wpdb;
+            $charset_collate = $wpdb->get_charset_collate();
+        
+            $table_name = self::table_name();
+            $sql = "CREATE TABLE $table_name (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            artist text NOT NULL,
+            title text NOT NULL,
+            PRIMARY KEY  (id)
+            ) $charset_collate;";
+        
+            require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+            dbDelta( $sql );
+            update_option( self::OPTION_DB_VERSION, self::SCHEMA_VERSION );
+        }
+
+        if ( !url_to_postid('playlist') ) {
+            wp_insert_post( array(
+                'post_title' => 'playlist',
+                'post_content' => '',
+                'post_status' => 'publish',
+                'post_type' => 'page'
+            ) );
+        }
+    }
+
+    function wp_init () {
+
+        add_option( self::OPTION_KEY );
+        add_option( self::OPTION_DB_VERSION );
+        //TODO load_plugin_textdomain('rivendell-now-and-next', false, basename( dirname( __FILE__ ) ) . '/lang' 
+    }
+    
+    /**
+     * request to /wp-admin/admin-post.php?action=rivendell_now_and_next_store
+     * you should POST : 
+     *  - "key" that matches the plugin configured key
+     *  - "artisttitle" structured as "ARTIST___TITLE" (that's 3 underscores)
+     */
+    function store () {
+        
+    }
+    
+    function show( $page_template ) {
+
+        if ( is_page( 'playlist' ) ) {
+            $page_template = dirname( __FILE__ ) . '/rivendell-playlist-page.php';
+        }
+        
+        return $page_template;
+    }
 }
 
-add_action( 'init', 'register_cpt_playlist_entry' );
-add_option('key');
+$rivendell_now_and_next = new RivendellNowAndNext();
+
