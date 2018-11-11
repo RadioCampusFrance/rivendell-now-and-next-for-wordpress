@@ -98,7 +98,7 @@ class RivendellNowAndNext {
         if ( is_page( 'playlist' ) ) {
             add_filter( 'the_content', array ( $this, 'list_entries'), 1 );
         }
-
+        
         return $page_template;
     }
 
@@ -121,8 +121,15 @@ class RivendellNowAndNext {
         ");
 
         $content .= "<ul>\n";
+        $previous_day = null;
         foreach ( $entries as $entry ) {
-            $content .= "<li>$entry->time $entry->artist - $entry->title</li>\n";
+            $day = substr($entry->time, 0, 10);# TODO use date() with name-of-day format
+            if ( $day != $previous_day ) {
+                $previous_day = $day;
+                $content .= "</ul>\n<h2>$day</h2>\n<ul>\n";
+            }
+            $time = substr($entry->time, 11, 5);
+            $content .= "<li>$time $entry->artist - $entry->title</li>\n";
         }
         $content .= "</ul>\n";
 
