@@ -38,8 +38,8 @@ class RivendellNowAndNext {
     public function __construct () {
         register_activation_hook( __FILE__, array ( $this, 'install' ) );
         add_action( 'init', array ( $this, 'wp_init') );
-        add_action( 'admin_post_nopriv_store', array ( $this, 'store') );
-        add_action( 'admin_post_store', array ( $this, 'store') );
+        add_action( 'admin_post_nopriv_rivendell_now_and_next_store', array ( $this, 'store') );
+        add_action( 'admin_post_rivendell_now_and_next_store', array ( $this, 'store') );
         add_filter( 'page_template', array ( $this, 'playlist_page') , 99 );
     }
 
@@ -90,7 +90,12 @@ class RivendellNowAndNext {
      *  - "artisttitle" structured as "ARTIST___TITLE" (that's 3 underscores)
      */
     function store () {
+        $key = stripslashes(@$_POST['key']);
+        $raw_id = stripslashes(@$_POST['artisttitle']);
+        #mb_ereg_search("", $raw)
         
+        print "key is $key\n";
+        print "$raw_id is $raw_id ";
     }
     
     function playlist_page ( $page_template ) {
