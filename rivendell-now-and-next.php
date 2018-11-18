@@ -143,7 +143,9 @@ class RivendellNowAndNext {
         $content .= "<ul>\n";
         $previous_day = null;
         foreach ( $entries as $entry ) {
-            $day = substr($entry->time, 0, 10);# TODO use date() with name-of-day format
+            # TODO maybe need setlocale(LC_TIME, 'fr_FR.utf8','fra');
+            $timestamp = strtotime($entry->time);
+            $day = strftime("%A %e %B %Y", $timestamp);
             if ( $day != $previous_day ) {
                 $previous_day = $day;
                 $content .= "</ul>\n<h2>$day</h2>\n<ul>\n";
