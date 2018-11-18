@@ -90,12 +90,27 @@ class RivendellNowAndNext {
      *  - "artisttitle" structured as "ARTIST___TITLE" (that's 3 underscores)
      */
     function store () {
+
         $key = stripslashes(@$_POST['key']);
-        $raw_id = stripslashes(@$_POST['artisttitle']);
-        #mb_ereg_search("", $raw)
+        // TODO test $key against OPTION_KEY
         
-        print "key is $key\n";
-        print "$raw_id is $raw_id ";
+        $raw_id = stripslashes(@$_POST['artisttitle']);
+        preg_match("/(.*)___(.*)/", $raw_id, $matches);
+        $artist = @$matches[1];
+        $title = @$matches[2];
+        $now = strftime("%Y-%m-%d %H:%M:%S");
+        
+        global $wpdb;
+        $table_name = self::table_name();
+        $entries = $wpdb->insert($table_name, array(
+            'time' => $now,
+            'artist' => $artist,
+            'title' => $title
+        ));
+
+        if ( $wpdb->insert_id ) {
+            print "OK";
+        }
     }
     
     function playlist_page ( $page_template ) {

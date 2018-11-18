@@ -22,5 +22,3 @@ KEY=${KEY/\&/\%26}
 URL="${WORDPRESS_BASE_URL}wp/wp-admin/admin-post.php?action=rivendell_now_and_next_store"
 
 curl -X POST -d "key=$KEY" -d "artisttitle=$ARTISTTITLE" $URL
-
-echo $URL
