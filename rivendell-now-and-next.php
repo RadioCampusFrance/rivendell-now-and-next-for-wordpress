@@ -41,6 +41,8 @@ class RivendellNowAndNext {
         add_action( 'admin_post_nopriv_rivendell_now_and_next_store', array ( $this, 'store') );
         add_action( 'admin_post_rivendell_now_and_next_store', array ( $this, 'store') );
         add_filter( 'page_template', array ( $this, 'playlist_page') , 99 );
+        add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+        add_action( 'admin_init', array( $this, 'admin_init' ) );
     }
 
     function install () {
@@ -83,17 +85,82 @@ class RivendellNowAndNext {
         //TODO load_plugin_textdomain('rivendell-now-and-next', false, basename( dirname( __FILE__ ) ) . '/lang' 
     }
     
+	function admin_menu () {
+
+        // This page will be under "Settings"
+        add_options_page(
+            "Rivendell's playlist settings",
+            'Rivendell',
+            'manage_options',
+            'rivendell_settings',
+            array( $this, 'options_page' )
+        );
+    }
+
+    function admin_init () {
+
+        register_setting( 'rivendell_settings', self::OPTION_KEY );
+
+        add_settings_section(
+            'capture_script_parameters', // ID
+            'Now & Next capture parameters', // Title
+            array( $this, 'empty_cb' ), // Callback
+            'rivendell_settings' // Page
+        );
+
+        add_settings_field(
+            'key', // ID
+            'Security Key', // Title
+            array( $this, 'settings_cb_key' ), // Callback
+            'rivendell_settings', // Page
+            'capture_script_parameters' // Section
+        );
+
+    }
+
+    function empty_cb ( $args ) {
+
+    }
+
+    function settings_cb_key ( $args ) {
+
+        $key = get_option( self::OPTION_KEY );
+        printf('<input type="text" id="key" class="large-text" name="%s" value="%s">',
+            self::OPTION_KEY, esc_attr( $key ));
+    }
+    
+    function options_page () {
+
+        if ( !current_user_can( 'manage_options' ) ) {
+			return;
+        }
+
+        echo '<div class="wrap">';
+		echo '<h1>'.esc_html( get_admin_page_title() ).'</h1>';
+        echo '<form method="post" action="options.php">';
+        settings_fields( 'rivendell_settings' );
+        do_settings_sections( 'rivendell_settings' );
+        submit_button( "Save", 'primary', 'submit' );
+		echo '</form>';
+		echo '</div>';
+    }
+
     /**
-     * request to /wp-admin/admin-post.php?action=rivendell_now_and_next_store
-     * you should POST : 
+     * POST request to /wp-admin/admin-post.php?action=rivendell_now_and_next_store should include data:
      *  - "key" that matches the plugin configured key
      *  - "artisttitle" structured as "ARTIST___TITLE" (that's 3 underscores)
      */
     function store () {
 
-        $key = stripslashes(@$_POST['key']);
-        // TODO test $key against OPTION_KEY
-        
+        $given_key = stripslashes(@$_POST['key']);
+        $key = get_option( self::OPTION_KEY );
+        if ( empty($key) ) {
+            print "The secret key is not configured. Please set a (long) one in Wordpress' parameters\n";
+            return;
+        } elseif ( $key != $given_key ) {
+            return;
+        }
+
         $raw_id = stripslashes(@$_POST['artisttitle']);
         preg_match("/(.*)___(.*)/", $raw_id, $matches);
         $artist = @$matches[1];
@@ -109,7 +176,7 @@ class RivendellNowAndNext {
         ));
 
         if ( $wpdb->insert_id ) {
-            print "OK";
+            print "OK\n";
         }
     }
     
