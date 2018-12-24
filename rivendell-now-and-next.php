@@ -165,6 +165,9 @@ class RivendellNowAndNext {
         preg_match("/(.*)___(.*)/", $raw_id, $matches);
         $artist = @$matches[1];
         $title = @$matches[2];
+        if ( empty( $artist ) && empty( $title ) ) {
+            return;
+        }
         $now = strftime("%Y-%m-%d %H:%M:%S");
         
         global $wpdb;

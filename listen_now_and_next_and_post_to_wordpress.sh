@@ -1,6 +1,10 @@
 #!/bin/bash
 
 ##### CHANGE VARIABLES BELOW
+
+# "UDP port" where Rivendell sends its now & next messages
+PORT=2345
+
 # public URL of your wordpress install
 WORDPRESS_BASE_URL="http://localhost/"
 
