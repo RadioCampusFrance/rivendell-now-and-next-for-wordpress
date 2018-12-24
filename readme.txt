@@ -14,8 +14,11 @@ Creates a "playlist" webpage, which you can edit to change the title and the
 header text.
 
 TODO
+* listener script as a system service
 * i18n https://codex.wordpress.org/I18n_for_WordPress_Developers
+* let the user browse the playlist by hour/date
 * drop table in https://developer.wordpress.org/reference/functions/register_uninstall_hook/
+* table cleanup (keep the history for only N months, add it as a parameter)
 
 == Installation ==
 
@@ -36,6 +39,16 @@ On the listener (assuming this is a freshly installed CentOS7) :
 * sudo firewall-cmd --permanent --zone=public --add-port=2345/udp
 * sudo firewall-cmd --reload
 
-ncat -u -l 2345
+Copy the plug-in forlder in your Wordpress installation, to /wp/wp-content/plugins.
+Log in Wordpress as an admin and go to the extensions page
+Find "Rivendell Now&Next collector and browser" in the list, and click on "activate".
+In the left menu browse to "Settings" and "Rivendell".
+Set a secret key: choose something long.
 
+The last step is the customisation of listen_now_and_next_and_post_to_wordpress.sh,
+change at least WORDPRESS_BASE_URL and KEY, according to what you set above.
 
+Then copy this file to the listener machine, and run it with 
+"nohup ./listen_now_and_next_and_post_to_wordpress.sh &> listen_now_and_next_and_post_to_wordpress.log &"
+
+Tracks should start to appear on http://yourWordpress.site/playlist 
