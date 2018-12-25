@@ -53,9 +53,9 @@ On the listener (assuming this is a freshly installed CentOS7, where we listen o
 * `sudo firewall-cmd --permanent --zone=public --add-port=2345/udp`
 * `sudo firewall-cmd --reload`
 *  change `listen_now_and_next_and_post_to_wordpress.sh`:
-change at least WORDPRESS_BASE_URL and KEY, according to what you set above.
+change at least `WORDPRESS_BASE_URL` and `KEY`, according to what you set above.
 * copy this file to the listener machine, log in and run the script with 
-"./listen_now_and_next_and_post_to_wordpress.sh &> listen_now_and_next_and_post_to_wordpress.log &"
+`./listen_now_and_next_and_post_to_wordpress.sh &> listen_now_and_next_and_post_to_wordpress.log &`
 * type `disown %1` before logging out
 
 Tracks should start to appear on http://yourWordpress.site/playlist 
