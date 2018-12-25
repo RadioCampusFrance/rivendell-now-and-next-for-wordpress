@@ -34,7 +34,7 @@ function post_to_wordpress() {
 
 while true
 do
-	line=`ncat -u -l $PORT -i 1s 2> /dev/null`
+	line=`ncat -u -l $PORT -i 3s 2> /dev/null`
 	if [ ! -z "$line" ];
 	then
 		post_to_wordpress "$line";
