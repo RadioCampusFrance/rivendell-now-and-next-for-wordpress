@@ -168,12 +168,11 @@ class RivendellNowAndNext {
         if ( empty( $artist ) && empty( $title ) ) {
             return;
         }
-        $now = strftime("%Y-%m-%d %H:%M:%S");
-        
+
         global $wpdb;
         $table_name = self::table_name();
         $entries = $wpdb->insert($table_name, array(
-            'time' => $now,
+            'time' => current_time( 'mysql' ),
             'artist' => $artist,
             'title' => $title
         ));
