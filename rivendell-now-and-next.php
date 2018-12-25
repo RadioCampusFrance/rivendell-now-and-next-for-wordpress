@@ -171,6 +171,18 @@ class RivendellNowAndNext {
 
         global $wpdb;
         $table_name = self::table_name();
+
+        $previous = $wpdb->get_row( "
+        SELECT *
+        FROM $table_name
+        ORDER BY time DESC
+        LIMIT 1
+        ");
+        if ( $previous->artist == $artist && $previous->title == $title ) {
+            print "Already posted, skipping\n";
+            return;
+        }
+
         $entries = $wpdb->insert($table_name, array(
             'time' => current_time( 'mysql' ),
             'artist' => $artist,
