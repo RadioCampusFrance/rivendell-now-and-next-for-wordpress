@@ -221,7 +221,7 @@ class RivendellNowAndNext {
         LIMIT 20
         ");
 
-        $content .= "<ul>\n";
+        $content .= "<ul class='rivendell-playlist'>\n";
         $previous_day = null;
         foreach ( $entries as $entry ) {
             # TODO maybe need setlocale(LC_TIME, 'fr_FR.utf8','fra');
@@ -229,10 +229,11 @@ class RivendellNowAndNext {
             $day = strftime("%A %e %B %Y", $timestamp);
             if ( $day != $previous_day ) {
                 $previous_day = $day;
-                $content .= "</ul>\n<h2>$day</h2>\n<ul>\n";
+                $content .= "</ul>\n<h2 class='rivendell-playlist-day'>$day</h2>\n<ul class='rivendell-playlist'>\n";
             }
             $time = substr($entry->time, 11, 5);
-            $content .= "<li>$time $entry->artist - $entry->title</li>\n";
+            # TIP: in CSS you can select artist with "li.rivendell-playlist span:nth-of-type(2)" 
+            $content .= "<li class='rivendell-playlist'><span>$time</span> <span>$entry->artist</span>: <span>$entry->title</span></li>\n";
         }
         $content .= "</ul>\n";
 
