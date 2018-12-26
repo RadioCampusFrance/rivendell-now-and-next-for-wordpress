@@ -162,7 +162,7 @@ class RivendellNowAndNext {
         }
 
         $raw_id = stripslashes(@$_POST['artisttitle']);
-        $matches = split('___', $raw_id);
+        $matches = explode( '___', $raw_id );
         $artist = @$matches[0];
         $title = @$matches[1];
         if ( empty( $artist ) && empty( $title ) ) {
