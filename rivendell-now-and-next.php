@@ -19,6 +19,7 @@ class RivendellNowAndNext {
     const SCHEMA_VERSION = "1.0";
     const OPTION_DB_VERSION = "rivendell_now_and_next_db_version";
     const OPTION_KEY = "rivendell_now_and_next_key";
+    const OPTION_KEEP_N_DAYS = "rivendell_now_and_next_keep_n_days";
 
     static function table_name () {
 
@@ -81,6 +82,7 @@ class RivendellNowAndNext {
     function wp_init () {
 
         add_option( self::OPTION_KEY );
+        add_option( self::OPTION_KEEP_N_DAYS );
         add_option( self::OPTION_DB_VERSION );
         //TODO load_plugin_textdomain('rivendell-now-and-next', false, basename( dirname( __FILE__ ) ) . '/lang' 
     }
@@ -100,6 +102,11 @@ class RivendellNowAndNext {
     function admin_init () {
 
         register_setting( 'rivendell_settings', self::OPTION_KEY );
+        register_setting( 'rivendell_settings', self::OPTION_KEEP_N_DAYS,
+            array(
+                'type' => 'integer',
+                'sanitize_callback' => array( $this, 'sanitize_keep_n_days' ),
+            ) );
 
         add_settings_section(
             'capture_script_parameters', // ID
@@ -116,6 +123,14 @@ class RivendellNowAndNext {
             'capture_script_parameters' // Section
         );
 
+        add_settings_field(
+            'keep_n_days', // ID
+            'Days before erasing playlist', // Title
+            array( $this, 'settings_cb_keep_n_days' ), // Callback
+            'rivendell_settings', // Page
+            'capture_script_parameters' // Section
+        );
+
     }
 
     function empty_cb ( $args ) {
@@ -128,7 +143,36 @@ class RivendellNowAndNext {
         printf('<input type="text" id="key" class="large-text" name="%s" value="%s">',
             self::OPTION_KEY, esc_attr( $key ));
     }
-    
+
+    function settings_cb_keep_n_days ( $args ) {
+
+        $current = get_option( self::OPTION_KEEP_N_DAYS );
+
+        if ( $current === false ){
+            $current = 7;
+        }
+
+        printf('<input type="text" id="keep_n_days" name="%s" value="%s">',
+            self::OPTION_KEEP_N_DAYS, esc_attr( $current ));
+    }
+
+    function sanitize_keep_n_days( $input ) {
+
+        if ( preg_match('/[0-9]+/', $input ) ){
+
+            return (int) $input;
+
+        } else {
+
+            add_settings_error(
+                'not_a_number',
+                'validationError',
+                'Please the number of days before erasing playlist items',
+                'error');
+        }
+        return null;
+    }
+
     function options_page () {
 
         if ( !current_user_can( 'manage_options' ) ) {
@@ -182,6 +226,13 @@ class RivendellNowAndNext {
             print "Already posted, skipping\n";
             return;
         }
+
+        $days_before_erasure = get_option( self::OPTION_KEEP_N_DAYS );
+        $erase_before = new DateTime("-${days_before_erasure}days");
+        $wpdb->query( $wpdb->prepare("
+            DELETE FROM $table_name
+            WHERE time <= %s
+        ", $erase_before->format("Y-m-d H:i:s") ) );
 
         $entries = $wpdb->insert($table_name, array(
             'time' => current_time( 'mysql' ),

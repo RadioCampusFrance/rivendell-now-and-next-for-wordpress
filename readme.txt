@@ -24,7 +24,6 @@ TODO
 * i18n https://codex.wordpress.org/I18n_for_WordPress_Developers
 * let the user browse the playlist by hour/date
 * drop table in https://developer.wordpress.org/reference/functions/register_uninstall_hook/
-* table cleanup (keep the history for only N days, add it as a parameter)
 
 Installation
 ============
