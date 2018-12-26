@@ -263,11 +263,48 @@ class RivendellNowAndNext {
             return $content;
         }
 
+        $before = @$_GET['before'];
+        if ( !empty($before) ) {
+            if ( !preg_match('/\A[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\z/', $before ) ){
+                $before = false;
+            }
+        }
+
         global $wpdb;
         $table_name = self::table_name();
+        $available_hours = $wpdb->get_results( "
+            SELECT DISTINCT DATE(time) as day, HOUR(time) as hour
+            FROM $table_name
+            ORDER BY time DESC
+        ");
+
+        $content .= "<a name='rivendellplaylist'/> </a>\n";
+        $content .= "<form class='rivendell-playlist' action='#rivendellplaylist'>\n";
+
+        $content .= "Titres diffusés vers <select name='before'>\n";
+        foreach ( $available_hours as $hour ) {
+            $timestamp = strtotime($hour->day.' '.$hour->hour.':00:00');
+            $display = strftime("%H:%M, %A %e %B %Y", $timestamp);
+            $value = $hour->day.' '.$hour->hour.':59:59';
+            if ( $value == $before ){
+                $selected = 'selected';
+            } else {
+                $selected = '';
+            }
+            $content .= "<option value='$value' $selected>$display</option>\n";
+        }
+        $content .= "</select><input type='submit' value='OK'/></form>\n";
+
+        if ( $before ){
+            $where = "time <= '$before'";
+        } else {
+            $where = "1";
+        }
+
         $entries = $wpdb->get_results( "
         SELECT *
         FROM $table_name
+        WHERE $where
         ORDER BY time DESC
         LIMIT 20
         ");

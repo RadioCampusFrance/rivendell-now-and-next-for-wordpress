@@ -22,7 +22,6 @@ TODO
 
 * listener script as a system service
 * i18n https://codex.wordpress.org/I18n_for_WordPress_Developers
-* let the user browse the playlist by hour/date
 * drop table in https://developer.wordpress.org/reference/functions/register_uninstall_hook/
 
 Installation
