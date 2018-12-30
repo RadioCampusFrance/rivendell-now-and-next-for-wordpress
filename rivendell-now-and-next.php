@@ -282,10 +282,15 @@ class RivendellNowAndNext {
         $content .= "<form class='rivendell-playlist' action='#rivendellplaylist'>\n";
 
         $content .= "Titres diffusés vers <select name='before'>\n";
-        foreach ( $available_hours as $hour ) {
-            $timestamp = strtotime($hour->day.' '.$hour->hour.':00:00');
+        foreach ( $available_hours as $entry ) {
+            if ( strlen( $entry->hour ) == 1) {
+                $hour = '0'.$entry->hour;
+            } else {
+                $hour = $entry->hour;
+            }
+            $timestamp = strtotime($entry->day.' '.$hour.':00:00');
             $display = strftime("%H:%M, %A %e %B %Y", $timestamp);
-            $value = $hour->day.' '.$hour->hour.':59:59';
+            $value = $entry->day.' '.$hour.':59:59';
             if ( $value == $before ){
                 $selected = 'selected';
             } else {
