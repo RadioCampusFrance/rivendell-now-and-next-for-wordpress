@@ -281,7 +281,7 @@ class RivendellNowAndNext {
         $content .= "<a name='rivendellplaylist'/> </a>\n";
         $content .= "<form class='rivendell-playlist' action='#rivendellplaylist'>\n";
 
-        $content .= "Titres diffusés vers <select name='before'>\n";
+        $content .= "Titres diffusés vers <select name='before' onchange='this.form.submit()'>>\n";
         foreach ( $available_hours as $entry ) {
             if ( strlen( $entry->hour ) == 1) {
                 $hour = '0'.$entry->hour;
