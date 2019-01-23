@@ -20,7 +20,7 @@ We have 3 roles for the machines involved:
 TODO
 ----
 
-* listener script as a system service
+* transmitter script as a system service
 * i18n https://codex.wordpress.org/I18n_for_WordPress_Developers
 * drop table in https://developer.wordpress.org/reference/functions/register_uninstall_hook/
 
@@ -46,13 +46,13 @@ On the WordPress server:
 * In the left menu browse to "Settings" and "Rivendell".
 * Set a secret key: choose something long.
 
-On the listener (assuming this is a freshly installed CentOS7, where we listen on port 2345):
+On the transmitter (assuming this is a freshly installed CentOS7, where we listen on port 2345):
 * `sudo yum install nmap-ncat`
 * `sudo firewall-cmd --permanent --zone=public --add-port=2345/udp`
 * `sudo firewall-cmd --reload`
 *  change `listen_now_and_next_and_post_to_wordpress.sh`:
 change at least `WORDPRESS_BASE_URL` and `KEY`, according to what you set above.
-* copy this file to the listener machine, log in and run the script with 
+* copy this file to the transmitter machine, log in and run the script with 
 `./listen_now_and_next_and_post_to_wordpress.sh &> listen_now_and_next_and_post_to_wordpress.log &`
 * type `disown %1` before logging out
 
