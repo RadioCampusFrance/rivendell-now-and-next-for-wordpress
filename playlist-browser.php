@@ -20,6 +20,7 @@ class PlaylistBrowser {
     const OPTION_DB_VERSION = "playlist_browser_db_version";
     const OPTION_KEY = "playlist_browser_key";
     const OPTION_KEEP_N_DAYS = "playlist_browser_keep_n_days";
+    const OPTION_INTRO = "playlist_browser_intro";
 
     static function table_name () {
 
@@ -84,6 +85,7 @@ class PlaylistBrowser {
         add_option( self::OPTION_KEY );
         add_option( self::OPTION_KEEP_N_DAYS );
         add_option( self::OPTION_DB_VERSION );
+        add_option( self::OPTION_INTRO );
     }
     
 	function admin_menu () {
@@ -101,6 +103,7 @@ class PlaylistBrowser {
     function admin_init () {
 
         register_setting( 'playlist_settings', self::OPTION_KEY );
+        register_setting( 'playlist_settings', self::OPTION_INTRO );
         register_setting( 'playlist_settings', self::OPTION_KEEP_N_DAYS,
             array(
                 'type' => 'integer',
@@ -130,6 +133,14 @@ class PlaylistBrowser {
             'playlist_parameters' // Section
         );
 
+        add_settings_field(
+            'intro', // ID
+            'Introduction text', // Title
+            array( $this, 'settings_cb_intro' ), // Callback
+            'playlist_settings', // Page
+            'playlist_parameters' // Section
+        );
+
     }
 
     function empty_cb ( $args ) {
@@ -141,6 +152,16 @@ class PlaylistBrowser {
         $key = get_option( self::OPTION_KEY );
         printf('<input type="text" id="key" class="large-text" name="%s" value="%s">',
             self::OPTION_KEY, esc_attr( $key ));
+    }
+
+    function settings_cb_intro ( $args ) {
+
+        $intro = get_option( self::OPTION_INTRO );
+        if ( $current === false ){
+            $current = "Tracks broadcasted at:";
+        }
+        printf('<input type="text" id="intro" class="large-text" name="%s" value="%s">',
+            self::OPTION_INTRO, esc_attr( $intro ));
     }
 
     function settings_cb_keep_n_days ( $args ) {
@@ -279,7 +300,9 @@ class PlaylistBrowser {
         $content .= "<a name='topplaylist'/> </a>\n";
         $content .= "<form class='playlist-browser' action='#topplaylist'>\n";
 
-        $content .= "Titres diffusés vers" . "<select name='before' onchange='this.form.submit()'>>\n";
+        $intro = get_option( self::OPTION_INTRO );
+
+        $content .= $intro . " <select name='before' onchange='this.form.submit()'>>\n";
         foreach ( $available_hours as $entry ) {
             if ( strlen( $entry->hour ) == 1) {
                 $hour = '0'.$entry->hour;
