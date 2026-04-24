@@ -32,4 +32,18 @@ The query should contain the following form data fields:
 
 Tracks should start to appear on http://yourWordpress.site/playlist 
 
-CSS tip:  # TIP: in CSS you can select artist with "li.rivendell-playlist span:nth-of-type(2)" 
+CSS tip: you can select artist with `li.playlist-browser span:nth-of-type(2)`
+
+The plugin provides a REST API endpoint to get the latest playlist entry:
+
+`GET /wp-json/playlist-browser/v1/latest`
+
+Response format:
+```json
+{"latest":"artist - title"}
+```
+
+If no entries exist, the response will be:
+```json
+{"latest":null}
+```

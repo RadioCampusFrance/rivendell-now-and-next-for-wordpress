@@ -46,6 +46,7 @@ class PlaylistBrowser {
         add_filter( 'page_template', array ( $this, 'playlist_page') , 99 );
         add_action( 'admin_menu', array( $this, 'admin_menu' ) );
         add_action( 'admin_init', array( $this, 'admin_init' ) );
+        add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
     }
 
     function install () {
@@ -363,6 +364,36 @@ class PlaylistBrowser {
         $content .= "</ul>\n";
 
         return $content;
+    }
+
+    public function register_rest_routes() {
+        register_rest_route('playlist-browser/v1', '/latest', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_latest_entry'),
+            'permission_callback' => '__return_true'
+        ));
+    }
+
+    public function get_latest_entry(WP_REST_Request $request) {
+        global $wpdb;
+        $table_name = self::table_name();
+
+        $latest = $wpdb->get_row($wpdb->prepare(
+            "SELECT artist, title 
+            FROM $table_name 
+            ORDER BY time DESC 
+            LIMIT 1"
+        ));
+
+        if ($latest) {
+            return new WP_REST_Response(array(
+                'latest' => $latest->artist . ' - ' . $latest->title
+            ), 200);
+        } else {
+            return new WP_REST_Response(array(
+                'latest' => null
+            ), 200);
+        }
     }
 }
 
