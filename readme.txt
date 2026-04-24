@@ -2,8 +2,8 @@
 Contributors: kirchgem
 Tags: podcast, audio, feed, radio, media
 Requires at least: 4.9
-Tested up to: 5.1
-Stable tag: 1.0
+Tested up to: 6.5
+Stable tag: 2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,10 +12,6 @@ This plug-in:
 * Creates a `/playlist` Wordpress page (which you can edit to change the title and the
 header text) where the user can browse the playlist.
 
-TODO
-----
-
-* drop table in https://developer.wordpress.org/reference/functions/register_uninstall_hook/
 
 Installation
 ============

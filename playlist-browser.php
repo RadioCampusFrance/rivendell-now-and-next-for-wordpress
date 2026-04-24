@@ -1,13 +1,13 @@
 <?php
 /**
-* Plugin Name: Playlist collector and browser
-* Plugin URI: https://github.com/RadioCampusFrance/playlist-for-wordpress
-* Description: Collects playlist data, stores the playlist and lets the user browse the past playlist.
-* Version: 2.0
-* Author: Martin Kirchgessner
-* Author URI: https://github.com/martinkirch
-* License: GPLv2
-*/
+ * Plugin Name: Playlist collector and browser
+ * Plugin URI: https://github.com/RadioCampusFrance/playlist-for-wordpress
+ * Description: Collects playlist data, stores the playlist and lets the user browse the past playlist.
+ * Version: 2.0
+ * Author: Martin Kirchgessner
+ * Author URI: https://github.com/martinkirch
+ * License: GPLv2
+ */
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -39,6 +39,7 @@ class PlaylistBrowser {
 
     public function __construct () {
         register_activation_hook( __FILE__, array ( $this, 'install' ) );
+        register_uninstall_hook( __FILE__, array( 'PlaylistBrowser', 'uninstall' ) );
         add_action( 'init', array ( $this, 'wp_init') );
         add_action( 'admin_post_nopriv_playlist_browser_store', array ( $this, 'store') );
         add_action( 'admin_post_playlist_browser_store', array ( $this, 'store') );
@@ -78,6 +79,18 @@ class PlaylistBrowser {
                 'post_type' => 'page'
             ) );
         }
+    }
+
+    public static function uninstall() {
+        global $wpdb;
+        $table_name = self::table_name();
+        $sql = "DROP TABLE IF EXISTS $table_name";
+        $wpdb->query($sql);
+
+        delete_option(self::OPTION_DB_VERSION);
+        delete_option(self::OPTION_KEY);
+        delete_option(self::OPTION_KEEP_N_DAYS);
+        delete_option(self::OPTION_INTRO);
     }
 
     function wp_init () {
@@ -157,8 +170,8 @@ class PlaylistBrowser {
     function settings_cb_intro ( $args ) {
 
         $intro = get_option( self::OPTION_INTRO );
-        if ( $current === false ){
-            $current = "Tracks broadcasted at:";
+        if ( $intro === false ){
+            $intro = "Tracks broadcasted at:";
         }
         printf('<input type="text" id="intro" class="large-text" name="%s" value="%s">',
             self::OPTION_INTRO, esc_attr( $intro ));
@@ -187,10 +200,10 @@ class PlaylistBrowser {
             add_settings_error(
                 'not_a_number',
                 'validationError',
-                'Please the number of days before erasing playlist items',
+                'Please enter the number of days before erasing playlist items',
                 'error');
         }
-        return null;
+        return get_option(self::OPTION_KEEP_N_DAYS, 7);
     }
 
     function options_page () {
@@ -216,8 +229,7 @@ class PlaylistBrowser {
      *  - "title"
      */
     function store () {
-
-        $given_key = stripslashes(@$_POST['key']);
+        $given_key = sanitize_text_field($_POST['key']);
         $key = get_option( self::OPTION_KEY );
         if ( empty($key) ) {
             print "The secret key is not configured. Please set a (long) one in Wordpress' parameters\n";
@@ -226,8 +238,8 @@ class PlaylistBrowser {
             return;
         }
 
-        $artist = stripslashes(@$_POST['artist']);
-        $title = stripslashes(@$_POST['title']);
+        $artist = isset($_POST['artist']) ? sanitize_text_field($_POST['artist']) : '';
+        $title = isset($_POST['title']) ? sanitize_text_field($_POST['title']) : '';
         if ( empty( $artist ) && empty( $title ) ) {
             return;
         }
@@ -235,13 +247,13 @@ class PlaylistBrowser {
         global $wpdb;
         $table_name = self::table_name();
 
-        $previous = $wpdb->get_row( "
-        SELECT *
+        $previous = $wpdb->get_row( $wpdb->prepare(
+        "SELECT *
         FROM $table_name
         ORDER BY time DESC
-        LIMIT 1
-        ");
-        if ( $previous->artist == $artist && $previous->title == $title ) {
+        LIMIT 1"
+        ) );
+        if ( $previous && $previous->artist == $artist && $previous->title == $title ) {
             print "Already posted, skipping\n";
             return;
         }
@@ -282,7 +294,7 @@ class PlaylistBrowser {
             return $content;
         }
 
-        $before = @$_GET['before'];
+        $before = isset($_GET['before']) ? sanitize_text_field($_GET['before']) : '';
         if ( !empty($before) ) {
             if ( !preg_match('/\A[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\z/', $before ) ){
                 $before = false;
@@ -302,7 +314,7 @@ class PlaylistBrowser {
 
         $intro = get_option( self::OPTION_INTRO );
 
-        $content .= $intro . " <select name='before' onchange='this.form.submit()'>>\n";
+        $content .= $intro . " <select name='before' onchange='this.form.submit()'>\n";
         foreach ( $available_hours as $entry ) {
             if ( strlen( $entry->hour ) == 1) {
                 $hour = '0'.$entry->hour;
@@ -317,23 +329,23 @@ class PlaylistBrowser {
             } else {
                 $selected = '';
             }
-            $content .= "<option value='$value' $selected>$display</option>\n";
+            $content .= "<option value='" . esc_attr($value) . "' $selected>$display</option>\n";
         }
         $content .= "</select><input type='submit' value='OK'/></form>\n";
 
         if ( $before ){
-            $where = "time <= '$before'";
+            $where = $wpdb->prepare("time <= %s", $before);
         } else {
             $where = "1";
         }
 
-        $entries = $wpdb->get_results( "
-        SELECT *
+        $entries = $wpdb->get_results( $wpdb->prepare(
+        "SELECT *
         FROM $table_name
         WHERE $where
         ORDER BY time DESC
-        LIMIT 20
-        ");
+        LIMIT 20"
+        ) );
 
         $content .= "<ul class='playlist-browser'>\n";
         $previous_day = null;
